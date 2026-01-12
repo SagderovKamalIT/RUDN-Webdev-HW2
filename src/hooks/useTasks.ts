@@ -3,25 +3,32 @@ import { fetchTasks } from "../services/taskService";
 import type { Task } from "../types/task";
 
 export const useTasks = () => {
-  return useQuery<Task[]>({
+  return useQuery({
     queryKey: ["tasks"],
     queryFn: fetchTasks,
   });
 };
 
+const getTaskById = async (
+  id: number,
+  queryClient: ReturnType<typeof useQueryClient>
+): Promise<Task | undefined> => {
+  const cachedTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+
+  if (cachedTasks) {
+    return cachedTasks.find((task) => task.id === id);
+  }
+
+  const tasksFromApi = await fetchTasks();
+  return tasksFromApi.find((task) => task.id === id);
+};
+
 export const useTask = (id: number) => {
   const queryClient = useQueryClient();
 
-  return useQuery<Task | undefined>({
+  return useQuery({
     queryKey: ["tasks", id],
-    queryFn: async () => {
-      const tasks = queryClient.getQueryData<Task[]>(["tasks"]);
-      if (tasks) {
-        return tasks.find((task) => task.id === id);
-      }
-      const allTasks = await fetchTasks();
-      return allTasks.find((task) => task.id === id);
-    },
-    enabled: !!id,
+    queryFn: () => getTaskById(id, queryClient),
+    enabled: Boolean(id),
   });
 };

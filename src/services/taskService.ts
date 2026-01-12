@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Task, TaskStatus } from "../types/task";
+import type { Task, TaskStatus } from "../types/task";
 
 interface JSONPlaceholderTodo {
   userId: number;

@@ -1,6 +1,6 @@
-import { Typography, Box, Paper, CircularProgress, Chip } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { useTasks } from "../../hooks/useTasks";
-import TaskCard from "../../components/TaskCard/TaskCard";
+import BoardColumn from "./BoardColumn";
 import type { Task } from "../../types/task";
 
 const BoardPage = () => {
@@ -31,9 +31,9 @@ const BoardPage = () => {
     );
   }
 
-  const tasksToDo = tasks?.filter((task: Task) => task.status === 0) || [];
-  const tasksInProgress = tasks?.filter((task: Task) => task.status === 1) || [];
-  const tasksDone = tasks?.filter((task: Task) => task.status === 2) || [];
+  const tasksToDo = tasks?.filter((t: Task) => t.status === 0) || [];
+  const tasksInProgress = tasks?.filter((t: Task) => t.status === 1) || [];
+  const tasksDone = tasks?.filter((t: Task) => t.status === 2) || [];
 
   return (
     <Box
@@ -52,105 +52,9 @@ const BoardPage = () => {
           mx: "auto",
         }}
       >
-        <Box sx={{ flex: 1 }}>
-          <Paper
-            elevation={3}
-            sx={{
-              p: 3,
-              borderRadius: 2,
-              backgroundColor: "#fff",
-              borderTop: "4px solid",
-              borderColor: "error.main",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mr: 1 }}>
-                К выполнению
-              </Typography>
-              <Chip
-                label={tasksToDo.length}
-                size="small"
-                color="error"
-                sx={{ fontWeight: 600 }}
-              />
-            </Box>
-            {tasksToDo.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                Нет задач
-              </Typography>
-            ) : (
-              tasksToDo.map((task: Task) => (
-                <TaskCard key={task.id} task={task} />
-              ))
-            )}
-          </Paper>
-        </Box>
-        <Box sx={{ flex: 1 }}>
-          <Paper
-            elevation={3}
-            sx={{
-              p: 3,
-              borderRadius: 2,
-              backgroundColor: "#fff",
-              borderTop: "4px solid",
-              borderColor: "warning.main",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mr: 1 }}>
-                В работе
-              </Typography>
-              <Chip
-                label={tasksInProgress.length}
-                size="small"
-                color="warning"
-                sx={{ fontWeight: 600 }}
-              />
-            </Box>
-            {tasksInProgress.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                Нет задач
-              </Typography>
-            ) : (
-              tasksInProgress.map((task: Task) => (
-                <TaskCard key={task.id} task={task} />
-              ))
-            )}
-          </Paper>
-        </Box>
-        <Box sx={{ flex: 1 }}>
-          <Paper
-            elevation={3}
-            sx={{
-              p: 3,
-              borderRadius: 2,
-              backgroundColor: "#fff",
-              borderTop: "4px solid",
-              borderColor: "success.main",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mr: 1 }}>
-                Выполнено
-              </Typography>
-              <Chip
-                label={tasksDone.length}
-                size="small"
-                color="success"
-                sx={{ fontWeight: 600 }}
-              />
-            </Box>
-            {tasksDone.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                Нет задач
-              </Typography>
-            ) : (
-              tasksDone.map((task: Task) => (
-                <TaskCard key={task.id} task={task} />
-              ))
-            )}
-          </Paper>
-        </Box>
+        <BoardColumn title="К выполнению" color="error" tasks={tasksToDo} />
+        <BoardColumn title="В работе" color="warning" tasks={tasksInProgress} />
+        <BoardColumn title="Выполнено" color="success" tasks={tasksDone} />
       </Box>
     </Box>
   );

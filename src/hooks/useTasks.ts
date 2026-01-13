@@ -9,26 +9,24 @@ export const useTasks = () => {
   });
 };
 
-const getTaskById = async (
-  id: number,
-  queryClient: ReturnType<typeof useQueryClient>
-): Promise<Task | undefined> => {
-  const cachedTasks = queryClient.getQueryData<Task[]>(["tasks"]);
-
-  if (cachedTasks) {
-    return cachedTasks.find((task) => task.id === id);
-  }
-
-  const tasksFromApi = await fetchTasks();
-  return tasksFromApi.find((task) => task.id === id);
-};
-
 export const useTask = (id: number) => {
   const queryClient = useQueryClient();
 
   return useQuery({
     queryKey: ["tasks", id],
-    queryFn: () => getTaskById(id, queryClient),
-    enabled: Boolean(id),
+    queryFn: async () => {
+      const cachedTasks = queryClient.getQueryData(["tasks"]);
+      
+      if (cachedTasks) {
+        const tasks = cachedTasks as Task[];
+        const foundTask = tasks.find((task: Task) => task.id === id);
+        return foundTask;
+      }
+      
+      const allTasks = await fetchTasks();
+      const foundTask = allTasks.find((task: Task) => task.id === id);
+      return foundTask;
+    },
+    enabled: id > 0,
   });
 };

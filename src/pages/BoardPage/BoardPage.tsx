@@ -1,6 +1,7 @@
 import { Typography, Box, Paper, CircularProgress, Chip } from "@mui/material";
 import { useTasks } from "../../hooks/useTasks";
 import TaskCard from "../../components/TaskCard/TaskCard";
+import type { Task } from "../../types/task";
 
 const BoardPage = () => {
   const { data: tasks, isLoading, isError } = useTasks();
@@ -30,9 +31,9 @@ const BoardPage = () => {
     );
   }
 
-  const tasksToDo = tasks?.filter((task) => task.status === 0) || [];
-  const tasksInProgress = tasks?.filter((task) => task.status === 1) || [];
-  const tasksDone = tasks?.filter((task) => task.status === 2) || [];
+  const tasksToDo = tasks?.filter((task: Task) => task.status === 0) || [];
+  const tasksInProgress = tasks?.filter((task: Task) => task.status === 1) || [];
+  const tasksDone = tasks?.filter((task: Task) => task.status === 2) || [];
 
   return (
     <Box
@@ -78,7 +79,7 @@ const BoardPage = () => {
                 Нет задач
               </Typography>
             ) : (
-              tasksToDo.map((task) => (
+              tasksToDo.map((task: Task) => (
                 <TaskCard key={task.id} task={task} />
               ))
             )}
@@ -111,7 +112,7 @@ const BoardPage = () => {
                 Нет задач
               </Typography>
             ) : (
-              tasksInProgress.map((task) => (
+              tasksInProgress.map((task: Task) => (
                 <TaskCard key={task.id} task={task} />
               ))
             )}
@@ -144,7 +145,7 @@ const BoardPage = () => {
                 Нет задач
               </Typography>
             ) : (
-              tasksDone.map((task) => (
+              tasksDone.map((task: Task) => (
                 <TaskCard key={task.id} task={task} />
               ))
             )}

@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchTasks } from "../services/taskService";
-import type { Task } from "../types/task";
+import type { Task, TaskStatus } from "../types/task";
 
 export const useTasks = () => {
   return useQuery({
@@ -28,5 +28,45 @@ export const useTask = (id: number) => {
       return foundTask;
     },
     enabled: id > 0,
+  });
+};
+
+export const useUpdateTaskStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { id: number; status: TaskStatus }) => payload,
+    onSuccess: ({ id, status }) => {
+      queryClient.setQueryData(["tasks"], (cached) => {
+        if (!cached) return cached;
+        const tasks = cached as Task[];
+        return tasks.map((task) =>
+          task.id === id ? { ...task, status } : task
+        );
+      });
+
+      queryClient.setQueryData(["tasks", id], (cached) => {
+        const task = cached as Task | undefined;
+        if (!task) return task;
+        return { ...task, status };
+      });
+    },
+  });
+};
+
+export const useDeleteTask = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => id,
+    onSuccess: (id) => {
+      queryClient.setQueryData(["tasks"], (cached) => {
+        if (!cached) return cached;
+        const tasks = cached as Task[];
+        return tasks.filter((task) => task.id !== id);
+      });
+
+      queryClient.removeQueries({ queryKey: ["tasks", id] });
+    },
   });
 };

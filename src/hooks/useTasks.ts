@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchTasks } from "../services/taskService";
 import type { Task, TaskStatus } from "../types/task";
+import { saveTasksToStorage } from "../utils/localStorage";
 
 export const useTasks = () => {
   return useQuery({
@@ -40,9 +41,11 @@ export const useUpdateTaskStatus = () => {
       queryClient.setQueryData(["tasks"], (cached: unknown) => {
         if (!cached) return cached;
         const tasks = cached as Task[];
-        return tasks.map((task) =>
+        const updatedTasks = tasks.map((task) =>
           task.id === id ? { ...task, status } : task
         );
+        saveTasksToStorage(updatedTasks);
+        return updatedTasks;
       });
 
       queryClient.setQueryData(["tasks", id], (cached: unknown) => {
@@ -63,7 +66,9 @@ export const useDeleteTask = () => {
       queryClient.setQueryData(["tasks"], (cached: unknown) => {
         if (!cached) return cached;
         const tasks = cached as Task[];
-        return tasks.filter((task) => task.id !== id);
+        const updatedTasks = tasks.filter((task) => task.id !== id);
+        saveTasksToStorage(updatedTasks);
+        return updatedTasks;
       });
 
       queryClient.removeQueries({ queryKey: ["tasks", id] });
@@ -108,10 +113,13 @@ export const useCreateTask = () => {
     onSuccess: (newTask) => {
       queryClient.setQueryData(["tasks"], (cached: unknown) => {
         if (!cached) {
+          saveTasksToStorage([newTask]);
           return [newTask];
         }
         const tasks = cached as Task[];
-        return [...tasks, newTask];
+        const updatedTasks = [...tasks, newTask];
+        saveTasksToStorage(updatedTasks);
+        return updatedTasks;
       });
     },
   });

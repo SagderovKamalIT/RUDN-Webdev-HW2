@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { Task } from "../types/task";
+import { getTasksFromStorage, saveTasksToStorage } from "../utils/localStorage";
 
 interface JSONPlaceholderTodo {
   id: number;
@@ -20,6 +21,14 @@ const mapTodoToTask = (todo: JSONPlaceholderTodo): Task => {
 };
 
 export const fetchTasks = async () => {
+  const savedTasks = getTasksFromStorage();
+  
+  if (savedTasks && savedTasks.length > 0) {
+    return savedTasks;
+  }
+  
   const response = await axios.get(`${API_BASE_URL}/todos`);
-  return response.data.map(mapTodoToTask);
+  const tasks = response.data.map(mapTodoToTask);
+  saveTasksToStorage(tasks);
+  return tasks;
 };

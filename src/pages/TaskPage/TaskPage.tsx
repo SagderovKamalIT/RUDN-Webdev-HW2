@@ -21,7 +21,7 @@ const TaskPage = () => {
   const updateStatus = useUpdateTaskStatus();
   const deleteTask = useDeleteTask();
 
-  const statuses: { value: TaskStatus; label: string; color: "default" | "warning" | "success" | "error" | "info" }[] = [
+  const statuses: { value: TaskStatus; label: string; color: "warning" | "success" | "error" | "info" | "primary" | "secondary" }[] = [
     { value: 0, label: "К выполнению", color: "error" },
     { value: 1, label: "В работе", color: "warning" },
     { value: 2, label: "Выполнено", color: "success" },

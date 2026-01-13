@@ -37,7 +37,7 @@ export const useUpdateTaskStatus = () => {
   return useMutation({
     mutationFn: async (payload: { id: number; status: TaskStatus }) => payload,
     onSuccess: ({ id, status }) => {
-      queryClient.setQueryData(["tasks"], (cached) => {
+      queryClient.setQueryData(["tasks"], (cached: unknown) => {
         if (!cached) return cached;
         const tasks = cached as Task[];
         return tasks.map((task) =>
@@ -45,7 +45,7 @@ export const useUpdateTaskStatus = () => {
         );
       });
 
-      queryClient.setQueryData(["tasks", id], (cached) => {
+      queryClient.setQueryData(["tasks", id], (cached: unknown) => {
         const task = cached as Task | undefined;
         if (!task) return task;
         return { ...task, status };
@@ -60,13 +60,59 @@ export const useDeleteTask = () => {
   return useMutation({
     mutationFn: async (id: number) => id,
     onSuccess: (id) => {
-      queryClient.setQueryData(["tasks"], (cached) => {
+      queryClient.setQueryData(["tasks"], (cached: unknown) => {
         if (!cached) return cached;
         const tasks = cached as Task[];
         return tasks.filter((task) => task.id !== id);
       });
 
       queryClient.removeQueries({ queryKey: ["tasks", id] });
+    },
+  });
+};
+
+export const useCreateTask = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { title: string; description: string | null }) => {
+      const cachedTasks = queryClient.getQueryData(["tasks"]);
+      let maxId = 0;
+      
+      if (cachedTasks) {
+        const tasks = cachedTasks as Task[];
+        tasks.forEach((task) => {
+          if (task.id > maxId) {
+            maxId = task.id;
+          }
+        });
+      } else {
+        const allTasks = await fetchTasks();
+        allTasks.forEach((task: Task) => {
+          if (task.id > maxId) {
+            maxId = task.id;
+          }
+        });
+      }
+
+      const newTask: Task = {
+        id: maxId + 1,
+        title: payload.title,
+        description: payload.description || null,
+        createdAt: new Date(),
+        status: 0,
+      };
+
+      return newTask;
+    },
+    onSuccess: (newTask) => {
+      queryClient.setQueryData(["tasks"], (cached: unknown) => {
+        if (!cached) {
+          return [newTask];
+        }
+        const tasks = cached as Task[];
+        return [...tasks, newTask];
+      });
     },
   });
 };

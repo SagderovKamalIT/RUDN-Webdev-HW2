@@ -27,7 +27,7 @@ export const fetchTasks = async () => {
     return savedTasks;
   }
   
-  const response = await axios.get(`${API_BASE_URL}/todos`);
+  const response = await axios.get(`${API_BASE_URL}/todos?_limit=20`);
   const tasks = response.data.map(mapTodoToTask);
   saveTasksToStorage(tasks);
   return tasks;

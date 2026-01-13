@@ -3,14 +3,22 @@ import {
   Box,
   Paper,
   Stack,
-  Button,
-  Chip,
   CircularProgress,
   Divider,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router";
 import { useTask, useUpdateTaskStatus, useDeleteTask } from "../../hooks/useTasks";
 import type { TaskStatus } from "../../types/task";
+import TaskHeader from "./TaskHeader";
+import TaskDetails from "./TaskDetails";
+import TaskStatusButtons from "./TaskStatusButtons";
+import TaskActions from "./TaskActions";
+
+interface StatusOption {
+  value: TaskStatus;
+  label: string;
+  color: "warning" | "success" | "error" | "info" | "primary" | "secondary";
+}
 
 const TaskPage = () => {
   const { id } = useParams();
@@ -21,7 +29,7 @@ const TaskPage = () => {
   const updateStatus = useUpdateTaskStatus();
   const deleteTask = useDeleteTask();
 
-  const statuses: { value: TaskStatus; label: string; color: "warning" | "success" | "error" | "info" | "primary" | "secondary" }[] = [
+  const statuses: StatusOption[] = [
     { value: 0, label: "К выполнению", color: "error" },
     { value: 1, label: "В работе", color: "warning" },
     { value: 2, label: "Выполнено", color: "success" },
@@ -93,77 +101,35 @@ const TaskPage = () => {
         sx={{ p: 3, maxWidth: 800, mx: "auto", borderRadius: 2 }}
       >
         <Stack spacing={2}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Задача #{task.id}
-            </Typography>
-            {statusInfo && (
-              <Chip
-                label={statusInfo.label}
-                color={statusInfo.color}
-                size="small"
-              />
-            )}
-          </Box>
+          {statusInfo && (
+            <TaskHeader
+              taskId={task.id}
+              statusLabel={statusInfo.label}
+              statusColor={statusInfo.color}
+            />
+          )}
 
           <Divider />
 
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Название
-            </Typography>
-            <Typography variant="h6">{task.title}</Typography>
-          </Box>
-
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Описание
-            </Typography>
-            <Typography variant="body1">
-              {task.description || "Описание отсутствует"}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Дата создания
-            </Typography>
-            <Typography variant="body2">{createdAtText}</Typography>
-          </Box>
+          <TaskDetails
+            title={task.title}
+            description={task.description}
+            createdAtText={createdAtText}
+          />
 
           <Divider />
 
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-            {statuses.map((item) => (
-              <Button
-                key={item.value}
-                variant={task.status === item.value ? "contained" : "outlined"}
-                color={item.color}
-                onClick={() => handleStatusChange(item.value)}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </Stack>
+          <TaskStatusButtons
+            currentStatus={task.status}
+            statuses={statuses}
+            onStatusChange={handleStatusChange}
+          />
 
-          <Box>
-            <Button
-              variant="outlined"
-              color="inherit"
-              sx={{ mr: 1 }}
-              onClick={() => navigate(-1)}
-            >
-              Назад
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleDelete}
-              disabled={deleteTask.isPending}
-            >
-              Удалить
-            </Button>
-          </Box>
+          <TaskActions
+            onGoBack={() => navigate(-1)}
+            onDelete={handleDelete}
+            isDeleting={deleteTask.isPending}
+          />
         </Stack>
       </Paper>
     </Box>
